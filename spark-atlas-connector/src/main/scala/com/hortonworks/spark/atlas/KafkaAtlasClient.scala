@@ -87,4 +87,6 @@ class KafkaAtlasClient(atlasClientConf: AtlasClientConf) extends AtlasHook with 
 
     notifyEntities(Seq(partialUpdateRequest).asJava, SparkUtils.ugi())
   }
+
+  override def getMessageSource: String = "spark"
 }

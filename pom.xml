@@ -30,7 +30,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
     <spark.version>2.4.0</spark.version>
-    <atlas.version>2.0.0</atlas.version>
+    <atlas.version>2.3.0</atlas.version>
     <maven.version>3.5.4</maven.version>
     <scala.version>2.11.12</scala.version>
     <scala.binary.version>2.11</scala.binary.version>
@@ -58,6 +58,21 @@
     <repository>
       <id>apache.snapshots.repo</id>
       <url>https://repository.apache.org/content/groups/snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>hortonworks.repo</id>
+      <url>https://repo.hortonworks.com/content/repositories/releases</url>
+      <name>Hortonworks Repo</name>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>mapr.conjars.repo</id>
+      <url>https://repository.mapr.com/nexus/content/groups/mapr-public/conjars</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
@@ -252,6 +267,10 @@
           <groupId>org.apache.solr</groupId>
           <artifactId>solr-test-framework</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
 
@@ -263,6 +282,10 @@
         <exclusion>
           <groupId>com.google.guava</groupId>
           <artifactId>guava</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

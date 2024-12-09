@@ -210,7 +210,7 @@ object CommandsHarvester extends AtlasEntityUtils with Logging {
 
   private def getPlanInfo(qd: QueryDetail): Map[String, String] = {
     Map("executionId" -> qd.executionId.toString,
-      "remoteUser" -> SparkUtils.currSessionUser(qd.qe),
+      "remoteUser" -> "defaultSparkUser",
       "details" -> qd.qe.toString(),
       "sparkPlanDescription" -> qd.qe.sparkPlan.toString())
   }
