@@ -18,11 +18,11 @@ How To Build
 ==========
 
 To use this connector, you will require a latest version of Spark (Spark 2.3+), because most of the features only exist in Spark 2.3.0+.
-
+jdk-version = 1.8
 To build this project, please execute:
 
 ```shell
-mvn package -DskipTests
+mvn clean package -DskipTests
 ```
 
 `mvn package` will assemble all the required dependencies and package into an uber jar.

@@ -18,16 +18,16 @@
 package com.hortonworks.spark.atlas
 
 import com.google.common.annotations.VisibleForTesting
+import com.hortonworks.spark.atlas.ml.MLPipelineEventProcessor
+import com.hortonworks.spark.atlas.sql._
+import com.hortonworks.spark.atlas.utils.Logging
 import org.apache.spark.scheduler.{SparkListener, SparkListenerEvent}
 import org.apache.spark.sql.catalyst.catalog.ExternalCatalogEvent
 import org.apache.spark.sql.execution.QueryExecution
 import org.apache.spark.sql.util.QueryExecutionListener
-import com.hortonworks.spark.atlas.sql._
-import com.hortonworks.spark.atlas.ml.MLPipelineEventProcessor
-import com.hortonworks.spark.atlas.utils.Logging
 
 class SparkAtlasEventTracker(atlasClient: AtlasClient, atlasClientConf: AtlasClientConf)
-    extends SparkListener with QueryExecutionListener with Logging {
+  extends SparkListener with QueryExecutionListener with Logging {
 
   def this(atlasClientConf: AtlasClientConf) = {
     this(AtlasClient.atlasClient(atlasClientConf), atlasClientConf)
@@ -38,11 +38,12 @@ class SparkAtlasEventTracker(atlasClient: AtlasClient, atlasClientConf: AtlasCli
   }
 
   private val enabled: Boolean = AtlasUtils.isSacEnabled(atlasClientConf)
+  private val async: Boolean = AtlasUtils.isAsyncHook(atlasClientConf)
 
   // Processor to handle DDL related events
   @VisibleForTesting
   private[atlas] val catalogEventTracker =
-    new SparkCatalogEventProcessor(atlasClient, atlasClientConf)
+  new SparkCatalogEventProcessor(atlasClient, atlasClientConf)
   catalogEventTracker.startThread()
 
   // Processor to handle DML related events
@@ -59,11 +60,21 @@ class SparkAtlasEventTracker(atlasClient: AtlasClient, atlasClientConf: AtlasCli
     }
 
     // We only care about SQL related events.
-    event match {
-      case e: ExternalCatalogEvent => catalogEventTracker.pushEvent(e)
-      case e: SparkListenerEvent if e.getClass.getName.contains("org.apache.spark.ml") =>
-        mlEventTracker.pushEvent(e)
-      case _ => // Ignore other events
+    logInfo(s"Atlas Received eventClassName: ${event.getClass.getName},event:${event}")
+    if (async) {
+      event match {
+        case e: ExternalCatalogEvent => catalogEventTracker.pushEvent(e)
+        case e: SparkListenerEvent if e.getClass.getName.contains("org.apache.spark.ml") =>
+          mlEventTracker.pushEvent(e)
+        case _ => // Ignore other events
+      }
+    } else {
+      event match {
+        case e: ExternalCatalogEvent => catalogEventTracker.process(e)
+        case e: SparkListenerEvent if e.getClass.getName.contains("org.apache.spark.ml") =>
+          mlEventTracker.process(e)
+        case _ => // Ignore other events
+      }
     }
   }
 
@@ -77,9 +88,15 @@ class SparkAtlasEventTracker(atlasClient: AtlasClient, atlasClientConf: AtlasCli
       // streaming query will be tracked via SparkAtlasStreamingQueryEventTracker
       return
     }
+    logInfo(s"Atlas Received onSuccess eventClassName: ${qe.getClass.getName}, query:${qe}")
 
     val qd = QueryDetail.fromQueryExecutionListener(qe, durationNs)
-    executionPlanTracker.pushEvent(qd)
+    if (async) {
+      executionPlanTracker.pushEvent(qd)
+    } else {
+      executionPlanTracker.process(qd)
+    }
+
   }
 
   override def onFailure(funcName: String, qe: QueryExecution, exception: Exception): Unit = {

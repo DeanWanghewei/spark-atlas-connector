@@ -61,7 +61,7 @@ abstract class AbstractEventProcessor[T: ClassTag] extends Logging {
     eventProcessThread.start()
   }
 
-  protected def process(e: T): Unit
+   def process(e: T): Unit
 
   @VisibleForTesting
   private[atlas] def eventProcess(): Unit = {

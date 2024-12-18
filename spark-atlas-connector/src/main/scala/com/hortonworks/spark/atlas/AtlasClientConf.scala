@@ -67,4 +67,6 @@ object AtlasClientConf {
   val CLIENT_NUM_RETRIES = ConfigEntry("atlas.client.numRetries", "3")
 
   val CLUSTER_NAME = ConfigEntry("atlas.cluster.name", "primary")
+
+  val ASYNC_HOOK = ConfigEntry("atlas.notification.hook.asynchronous", "true")
 }

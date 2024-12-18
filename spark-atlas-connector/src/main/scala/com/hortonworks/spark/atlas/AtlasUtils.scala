@@ -17,10 +17,10 @@
 
 package com.hortonworks.spark.atlas
 
-import java.util.concurrent.atomic.AtomicLong
-
 import com.hortonworks.spark.atlas.utils.Logging
 import org.apache.atlas.model.instance.{AtlasEntity, AtlasObjectId}
+
+import java.util.concurrent.atomic.AtomicLong
 
 object AtlasUtils extends Logging {
   private val executionId = new AtomicLong(0L)
@@ -34,8 +34,8 @@ object AtlasUtils extends Logging {
   }
 
   def entitiesToReferences(
-      entities: Seq[AtlasEntity],
-      useGuid: Boolean = false): Set[AtlasObjectId] = {
+                            entities: Seq[AtlasEntity],
+                            useGuid: Boolean = false): Set[AtlasObjectId] = {
     entities.map(entityToReference(_, useGuid)).toSet
   }
 
@@ -44,6 +44,15 @@ object AtlasUtils extends Logging {
   def isSacEnabled(conf: AtlasClientConf): Boolean = {
     if (!conf.get(AtlasClientConf.ATLAS_SPARK_ENABLED).toBoolean) {
       logWarn("Spark Atlas Connector is disabled.")
+      false
+    } else {
+      true
+    }
+  }
+
+  def isAsyncHook(conf: AtlasClientConf): Boolean = {
+    if (!conf.get(AtlasClientConf.ASYNC_HOOK).toBoolean) {
+      logInfo("Spark Atlas hook is  async.")
       false
     } else {
       true

@@ -69,7 +69,7 @@ class SparkExecutionPlanProcessor(
 
   // TODO: We should handle OVERWRITE to remove the old lineage.
   // TODO: We should consider LLAPRelation later
-  override protected def process(qd: QueryDetail): Unit = {
+  override  def process(qd: QueryDetail): Unit = {
     var outNodes: Seq[SparkPlan] = qd.qe.sparkPlan.collect {
       case p: UnionExec => p.children
       case p: DataWritingCommandExec => Seq(p)
